@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Delhi Metro Route Finder — Find shortest routes, calculate fares, and explore the Delhi Metro network with BFS, Dijkstra, A*, and DFS algorithms.">
+    <title>Delhi Metro Route Finder — DSA Project</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚇</text></svg>">
+</head>
+<body>
+
+    <!-- ═══════ Notifications Container ═══════ -->
+    <div id="notifications"></div>
+
+    <!-- ═══════ Map Tooltip ═══════ -->
+    <div id="map-tooltip"></div>
+
+    <!-- ═══════ App Container ═══════ -->
+    <div class="app-container">
+
+        <!-- ─────── Header ─────── -->
+        <header class="app-header">
+            <div class="header-brand">
+                <span class="header-logo">🚇</span>
+                <div>
+                    <div class="header-title">Delhi Metro Route Finder</div>
+                    <div class="header-subtitle">DSA Project — Graph · BFS · DFS · Dijkstra · A*</div>
+                </div>
+            </div>
+            <div class="header-stats" id="header-stats">
+                <!-- Filled by JS -->
+            </div>
+            <div class="header-badge">
+                <span class="pulse"></span>
+                Network Active
+            </div>
+        </header>
+
+        <!-- ─────── Left Panel: Controls ─────── -->
+        <aside class="left-panel">
+
+            <!-- Station Inputs -->
+            <div class="panel-section">
+                <div class="section-title">📍 Route Planner</div>
+
+                <div class="input-group">
+                    <label for="source-input">From</label>
+                    <span class="input-icon source">●</span>
+                    <input type="text" id="source-input" class="station-input" placeholder="Enter source station..." autocomplete="off">
+                    <div class="autocomplete-dropdown" id="source-dropdown"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="dest-input">To</label>
+                    <span class="input-icon dest">●</span>
+                    <input type="text" id="dest-input" class="station-input" placeholder="Enter destination..." autocomplete="off">
+                    <div class="autocomplete-dropdown" id="dest-dropdown"></div>
+                </div>
+
+                <div class="input-actions">
+                    <button class="btn-swap" id="swap-btn" title="Swap stations">⇅</button>
+                    <button class="btn-find" id="find-route-btn">🔍 Find Route</button>
+                    <button class="btn-clear" id="clear-btn">Clear</button>
+                </div>
+            </div>
+
+            <!-- Algorithm Selection -->
+            <div class="panel-section">
+                <div class="section-title">⚙️ Algorithm</div>
+                <div class="algo-grid">
+                    <button class="algo-btn active" data-algo="bfs">
+                        <span class="algo-icon">🔵</span>
+                        BFS<br><small>Fewest Stops</small>
+                    </button>
+                    <button class="algo-btn" data-algo="dijkstra">
+                        <span class="algo-icon">🟡</span>
+                        Dijkstra<br><small>Shortest Dist</small>
+                    </button>
+                    <button class="algo-btn" data-algo="astar">
+                        <span class="algo-icon">🟢</span>
+                        A* Search<br><small>Heuristic</small>
+                    </button>
+                    <button class="algo-btn" data-algo="min-interchange">
+                        <span class="algo-icon">🟣</span>
+                        Min Interchange<br><small>Fewest Changes</small>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Peak Hour Toggle -->
+            <div class="panel-section">
+                <div class="section-title">🎫 Fare Options</div>
+                <div class="peak-toggle-container">
+                    <span class="peak-label">⚡ Peak Hour Pricing</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="peak-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Quick Legend -->
+            <div class="panel-section">
+                <div class="section-title">🎨 Metro Lines</div>
+                <div class="legend-items" id="legend-items">
+                    <!-- Filled by JS in init -->
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- ─────── Center Panel: Metro Map ─────── -->
+        <main class="center-panel">
+            <div class="map-container">
+                <svg id="metro-map-svg" viewBox="0 0 900 640" preserveAspectRatio="xMidYMid meet">
+                    <!-- Map rendered by JS -->
+                </svg>
+            </div>
+        </main>
+
+        <!-- ─────── Right Panel: Results ─────── -->
+        <aside class="right-panel">
+
+            <!-- Tabs -->
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="route">🛤️ Route</button>
+                <button class="tab-btn" data-tab="fare">🎫 Fare</button>
+                <button class="tab-btn" data-tab="stats">📊 Stats</button>
+                <button class="tab-btn" data-tab="lines">🚇 Lines</button>
+            </div>
+
+            <!-- Tab Panels -->
+            <div class="tab-panel active" id="tab-route">
+                <div id="route-result">
+                    <!-- Route results populated by JS -->
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-fare">
+                <div id="fare-result">
+                    <div class="empty-state">
+                        <div class="empty-icon">🎫</div>
+                        <p>Find a route to see fare details</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-stats">
+                <div id="stats-content">
+                    <!-- Stats populated by JS -->
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-lines">
+                <div id="lines-content">
+                    <!-- Lines populated by JS -->
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- ═══════ Scripts ═══════ -->
+    <script src="metro-data.js"></script>
+    <script src="app.js"></script>
+
+    <!-- Populate header stats and legend after app loads -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Header stats
+            const headerStats = document.getElementById('header-stats');
+            const lineCount = Object.keys(METRO_LINES).length;
+            const stationSet = new Set();
+            let totalConnections = 0;
+            for (const line of Object.values(METRO_LINES)) {
+                line.stations.forEach(s => stationSet.add(s));
+                totalConnections += line.stations.length - 1;
+            }
+            headerStats.innerHTML = `
+                <div class="header-stat">
+                    <div class="header-stat-value">${stationSet.size}</div>
+                    <div class="header-stat-label">Stations</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value">${totalConnections}</div>
+                    <div class="header-stat-label">Connections</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value">${lineCount}</div>
+                    <div class="header-stat-label">Lines</div>
+                </div>
+            `;
+
+            // Legend
+            const legend = document.getElementById('legend-items');
+            legend.innerHTML = Object.entries(METRO_LINES).map(([name, data]) =>
+                `<div class="legend-item">
+                    <span class="legend-dot" style="background:${data.color}"></span>
+                    ${name}
+                </div>`
+            ).join('');
+        });
+    </script>
+
+</body>
+</html>
